@@ -3,6 +3,7 @@
     [nurjur.middleware :as middleware]
     [nurjur.layout :refer [error-page]]
     [nurjur.routes.home :refer [home-routes]]
+    [nurjur.routes.user :refer [user-routes]]
     [reitit.ring :as ring]
     [ring.middleware.content-type :refer [wrap-content-type]]
     [ring.middleware.webjars :refer [wrap-webjars]]
@@ -17,7 +18,8 @@
   :start
   (ring/ring-handler
     (ring/router
-      [(home-routes)])
+     [(home-routes)
+      (user-routes)])
     (ring/routes
       (ring/create-resource-handler
         {:path "/"})
