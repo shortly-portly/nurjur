@@ -1,21 +1,17 @@
 (ns nurjur.core
-  (:require
-    [reagent.core :as r]
-    [goog.events :as events]
-    [goog.history.EventType :as HistoryEventType]
-    [markdown.core :refer [md->html]]
-    [nurjur.ajax :as ajax]
-    [ajax.core :refer [GET POST]]
-    [reitit.core :as reitit]
-    [clojure.string :as string])
-  (:import goog.History))
+ (:require [reagent.core :as r]
+            [reitit.frontend :as rf]
+            [reitit.frontend.easy :as rfe]
+            [reitit.coercion :as rc]
+            [reitit.coercion.spec :as rss]
+            ))
 
-(defonce session (r/atom {:page :home}))
+(defonce match (r/atom nil))
 
-(defn nav-link [uri title page]
+(defn nav-link [title page]
   [:a.navbar-item
-   {:href   uri
-    :class (when (= page (:page @session)) "is-active")}
+   {:href (rfe/href page)
+    :class (when (= page (:name (:data @match)) "is-active"))}
    title])
 
 (defn navbar []
@@ -31,8 +27,9 @@
      [:div#nav-menu.navbar-menu
       {:class (when @expanded? :is-active)}
       [:div.navbar-start
-       [nav-link "#/" "Home" :home]
-       [nav-link "#/about" "About" :about]]]]))
+       [nav-link "Home" ::home]
+       [nav-link "About" ::about]
+       ]]]))
 
 (defn about-page []
   [:section.section>div.container>div.content
@@ -40,51 +37,32 @@
 
 (defn home-page []
   [:section.section>div.container>div.content
-   (when-let [docs (:docs @session)]
-     [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
-
-(def pages
-  {:home #'home-page
-   :about #'about-page})
-
-(defn page []
-  [(pages (:page @session))])
+   [:h1 "Home Page"]])
 
 ;; -------------------------
 ;; Routes
 
-(def router
-  (reitit/router
-    [["/" :home]
-     ["/about" :about]]))
+(defn current-page []
+  (navbar)
+  (if @match
+    (let [view (:view (:data @match))]
+      [view])))
 
-(defn match-route [uri]
-  (->> (or (not-empty (string/replace uri #"^.*#" "")) "/")
-       (reitit/match-by-path router)
-       :data
-       :name))
-;; -------------------------
-;; History
-;; must be called after routes have been defined
-(defn hook-browser-navigation! []
-  (doto (History.)
-    (events/listen
-      HistoryEventType/NAVIGATE
-      (fn [event]
-        (swap! session assoc :page (match-route (.-token event)))))
-    (.setEnabled true)))
-
-;; -------------------------
-;; Initialize app
-(defn fetch-docs! []
-  (GET "/docs" {:handler #(swap! session assoc :docs %)}))
-
-(defn mount-components []
-  (r/render [#'navbar] (.getElementById js/document "navbar"))
-  (r/render [#'page] (.getElementById js/document "app")))
+(def routes
+  [["/"
+    {:name ::home
+     :view home-page}]
+   ["/about"
+    {:name ::about
+     :view about-page}]])
 
 (defn init! []
-  (ajax/load-interceptors!)
-  (fetch-docs!)
-  (hook-browser-navigation!)
-  (mount-components))
+  (rfe/start!
+   (rf/router routes)
+   (fn [route]
+     (reset! match route))
+   {:user-fragment true})
+  (r/render [navbar] (.getElementById js/document "navbar"))
+  (r/render [current-page] (.getElementById js/document "app")))
+
+(init!)
