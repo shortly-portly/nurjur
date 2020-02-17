@@ -4,6 +4,7 @@
             [reitit.frontend.easy :as rfe]
             [reitit.coercion :as rc]
             [reitit.coercion.spec :as rss]
+            [nurjur.routes.user :as user]
             ))
 
 (defonce match (r/atom nil))
@@ -29,6 +30,7 @@
       [:div.navbar-start
        [nav-link "Home" ::home]
        [nav-link "About" ::about]
+       [nav-link "foo"  ::user/post ]
        ]]]))
 
 (defn about-page []
@@ -54,7 +56,8 @@
      :view home-page}]
    ["/about"
     {:name ::about
-     :view about-page}]])
+     :view about-page}]
+   ["/user" user/user-routes]])
 
 (defn init! []
   (rfe/start!
