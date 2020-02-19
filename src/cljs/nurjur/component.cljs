@@ -7,18 +7,9 @@
             ))
 
 (defn section [content]
-  (println (str "content.." content))
   [:section.section>div.container>div.content
    [:h1 "from section"]
    [:h2 "another bit from section"]
    content
    ])
 
-(defn input [label placeholder]
-
-   [:div.field
-    (if label [:label.label label])
-    [:div.control
-    [:input.input {:type "text"
-                 :placeholder placeholder}]]]
-  )
