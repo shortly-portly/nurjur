@@ -1,13 +1,21 @@
 (ns nurjur.routes.user
-  (:require [reitit.frontend.easy :as rfe]))
+  (:require [reitit.frontend.easy :as rfe]
+            [nurjur.component :as c]))
 
 (defn post-page []
-  [:section.section>div.container>div.content
+  [c/section
+   [:div
    [:h2 "Welcome to the User Page"]
+
+
+   [c/input nil "First Name"]
+   [c/input "Last Name" "Last Name"]
+   [c/input "Email" "Email"]
+
   [:a
    {:href (rfe/href ::thanks) }
    "a link"]
-   ])
+   ]])
 
 (defn thanks-page []
   [:section.section>div.container>div.content

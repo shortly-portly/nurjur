@@ -1,11 +1,11 @@
 (ns nurjur.core
- (:require [reagent.core :as r]
+  (:require [reagent.core :as r]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion :as rc]
             [reitit.coercion.spec :as rss]
             [nurjur.routes.user :as user]
-            ))
+            [nurjur.component :as c]))
 
 (defonce match (r/atom nil))
 
@@ -15,7 +15,7 @@
     :class (when (= page (:name (:data @match)) "is-active"))}
    title])
 
-(defn navbar []
+(defn navbar [links]
   (r/with-let [expanded? (r/atom false)]
     [:nav.navbar.is-info>div.container
      [:div.navbar-brand
@@ -24,28 +24,32 @@
        {:data-target :nav-menu
         :on-click #(swap! expanded? not)
         :class (when @expanded? :is-active)}
-       [:span][:span][:span]]]
+       [:span] [:span] [:span]]]
      [:div#nav-menu.navbar-menu
       {:class (when @expanded? :is-active)}
       [:div.navbar-start
-       [nav-link "Home" ::home]
-       [nav-link "About" ::about]
-       [nav-link "foo"  ::user/post ]
-       ]]]))
+       (for [link links]
+         ^{:key link} link)]]]))
+(def links
+  [[nav-link "Home" ::home]
+   [nav-link "About" ::about]
+   [nav-link "foo"  ::user/post]])
 
 (defn about-page []
-  [:section.section>div.container>div.content
-   [:img {:src "/img/warning_clojure.png"}]])
+  [c/section
+   [:div
+   [:h1 "About"]
+   [:h2 "Another bit"]]])
 
 (defn home-page []
-  [:section.section>div.container>div.content
+  [c/section
    [:h1 "Home Page"]])
 
 ;; -------------------------
 ;; Routes
 
 (defn current-page []
-  (navbar)
+  (navbar links)
   (if @match
     (let [view (:view (:data @match))]
       [view])))
@@ -65,7 +69,10 @@
    (fn [route]
      (reset! match route))
    {:user-fragment true})
-  (r/render [navbar] (.getElementById js/document "navbar"))
+  (r/render [navbar links] (.getElementById js/document "navbar"))
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)
+
+;; --------------------
+;; Scratch
