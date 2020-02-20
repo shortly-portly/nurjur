@@ -3,31 +3,38 @@
             [nurjur.component :as c]
             [reagent.core :as r]))
 
-(def fields (r/atom {}))
-
-
-(defn input [name label]
-(fn []
-  [:div
-   [:div.field
-    [:label.label label]
-    [:div.control
-     [:input.input
-      {:type :text
-       :name name
-       :value (name @fields)
-       :on-change #(swap! fields assoc name (-> % .-target .-value))
-       }]]]]))
+(defn validate [ratom]
+  (if (< (count (:first-name @ratom)) 3)
+    (swap! ratom assoc :error "name was too short")
+    (swap! ratom assoc :error nil)))
 
 (defn user-form []
-(fn []
+  (let [fields (r/atom {:first-name "Dave"})]
+    (fn []
       [:div
-       [input :first-name "First Name" fields]
-       [input :last-name "Last Name" fields]
-       [input :email "Email" fields]
+       [:div.field
+        [:label.label "First Name"]
+        [:div.control
+         [:input.input
+          {:type :text
+           :name :first-name
+           :defaultValue (:first-name @fields)
+           :on-blur #((swap! fields assoc :first-name (-> % .-target .-value))
+                      (validate fields))}]]]
 
-[:h5 "First Name is: " (:first-name @fields)]
-       [:h5 "The number of characters in First Name is: " (count (:first-name @fields))]]))
+       [:div
+        [:h4 (:error @fields)]]
+
+       [:div.field
+        [:label.label "Second Name"]
+        [:div.control
+         [:input.input
+          {:type :text
+           :name :second-name
+           :value (:second-name @fields)
+           :on-change #(swap! fields assoc :second-name (-> % .-target .-value))}]]]
+       [:h5 "First Name is: " (:first-name @fields)]
+       [:h5 "The number of characters in First Name is: " (count (:first-name @fields))]])))
 
 (defn post-page []
   [c/section
