@@ -1,40 +1,45 @@
 (ns nurjur.routes.user
   (:require [reitit.frontend.easy :as rfe]
             [nurjur.component :as c]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [struct.core :as st]))
 
-(defn validate [ratom]
-  (if (< (count (:first-name @ratom)) 3)
-    (swap! ratom assoc :error "name was too short")
-    (swap! ratom assoc :error nil)))
+(def fields (r/atom {}))
+
+(def user-schema
+  {:first-name [st/required
+                st/string
+                {:message "must be longer than 5 characters"
+                 :validate #(> (count %) 5)}]
+
+   :last-name [st/required
+               st/string
+               {:message "wrong, wrong wrong"
+                :validate #(> (count %) 5)}]})
+
+(defn validate [field-name]
+  (-> @fields
+      (st/validate {field-name (field-name user-schema)})
+      (first)
+      (field-name)))
 
 (defn user-form []
-  (let [fields (r/atom {:first-name "Dave"})]
-    (fn []
-      [:div
-       [:div.field
-        [:label.label "First Name"]
-        [:div.control
-         [:input.input
-          {:type :text
-           :name :first-name
-           :defaultValue (:first-name @fields)
-           :on-blur #((swap! fields assoc :first-name (-> % .-target .-value))
-                      (validate fields))}]]]
+  (fn []
+    [:div
 
-       [:div
-        [:h4 (:error @fields)]]
+     [c/text-input fields
+      :label "First Name"
+      :name :first-name
+      :error-field :first-name-error
+      :on-blur #((swap! fields assoc :first-name (-> % .-target .-value))
+                 (swap! fields assoc :first-name-error (validate :first-name)))]
 
-       [:div.field
-        [:label.label "Second Name"]
-        [:div.control
-         [:input.input
-          {:type :text
-           :name :second-name
-           :value (:second-name @fields)
-           :on-change #(swap! fields assoc :second-name (-> % .-target .-value))}]]]
-       [:h5 "First Name is: " (:first-name @fields)]
-       [:h5 "The number of characters in First Name is: " (count (:first-name @fields))]])))
+     [c/text-input fields
+      :label "Last Name"
+      :name :last-name
+      :error-field :last-name-error
+      :on-blur #((swap! fields assoc :last-name (-> % .-target .-value))
+                 (swap! fields assoc :last-name-error (validate :last-name)))]]))
 
 (defn post-page []
   [c/section
