@@ -2,44 +2,25 @@
   (:require [reitit.frontend.easy :as rfe]
             [nurjur.component :as c]
             [reagent.core :as r]
+            [nurjur.db :as n]
             [struct.core :as st]))
 
-(def fields (r/atom {}))
 
-(def user-schema
-  {:first-name [st/required
-                st/string
-                {:message "must be longer than 5 characters"
-                 :validate #(> (count %) 5)}]
-
-   :last-name [st/required
-               st/string
-               {:message "wrong, wrong wrong"
-                :validate #(> (count %) 5)}]})
-
-(defn validate [field-name]
-  (-> @fields
-      (st/validate {field-name (field-name user-schema)})
-      (first)
-      (field-name)))
 
 (defn user-form []
   (fn []
     [:div
 
-     [c/text-input fields
+     [c/text-input
       :label "First Name"
       :name :first-name
       :error-field :first-name-error
-      :on-blur #((swap! fields assoc :first-name (-> % .-target .-value))
-                 (swap! fields assoc :first-name-error (validate :first-name)))]
+      ]
 
-     [c/text-input fields
+     [c/text-input
       :label "Last Name"
       :name :last-name
-      :error-field :last-name-error
-      :on-blur #((swap! fields assoc :last-name (-> % .-target .-value))
-                 (swap! fields assoc :last-name-error (validate :last-name)))]]))
+      :error-field :last-name-error]]))
 
 (defn post-page []
   [c/section
