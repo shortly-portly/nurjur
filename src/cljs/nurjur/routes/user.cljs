@@ -29,14 +29,13 @@
       :label "First Name"
       :name :first-name
       :validations [st/required st/string validate-length]
-      :error-field :first-name-error
       ]
 
      [c/text-input
       :label "Last Name"
       :name :last-name
       :validations [st/required st/string validate-length]
-      :error-field :last-name-error]]))
+      ]]))
 
 (defn post-page []
   [c/section
