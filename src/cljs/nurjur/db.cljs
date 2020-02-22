@@ -1,5 +1,4 @@
 (ns nurjur.db
-
   (:require
    [reagent.core :as r]))
 
