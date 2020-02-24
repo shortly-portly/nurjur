@@ -7,9 +7,16 @@
             [struct.core :as st]
             [reitit.coercion.spec :as rss]))
 
+(defn validate? [field-name]
+  "Determine if the given field should be validated. An optional field will be validated if it contains data."
+  (or (seq (field-name @n/db))
+      (not (get-in @n/db [:optional field-name]))))
+
 (defn validate [field-name validations]
-  (if-let [error (first (st/validate @n/db {field-name validations}))]
-    error
+  (if (validate? field-name)
+    (if-let [error (first (st/validate @n/db {field-name validations}))]
+      error
+      {field-name nil})
     {field-name nil}))
 
 (defn section [content]
@@ -17,6 +24,7 @@
    content])
 
 (defn text-input [& {:as args}]
+  (swap! n/db assoc :optional (merge (:optional @n/db) {(:name args) (:optional args)}))
   (fn []
     [:div.field
      [:label.label (:label args)]

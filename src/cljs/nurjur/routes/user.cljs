@@ -6,20 +6,9 @@
             [struct.core :as st]))
 
 
-
-(def user-schema
-  {:first-name [st/required
-                st/string
-                {:message "must be longer than 5 characters"
-                 :validate #(> (count %) 5)}]
-
-   :last-name [st/required
-               st/string
-               {:message "wrong, wrong wrong"
-                :validate #(> (count %) 5)}]})
-(def validate-length
-  {:message "wrong wrong wrong"
-   :validate #(> (count %) 5)})
+(defn validate-length [length]
+  {:message (str "Length must be greater than " length)
+   :validate #(> (count %) length)})
 
 (defn user-form []
   (fn []
@@ -28,14 +17,29 @@
      [c/text-input
       :label "First Name"
       :name :first-name
-      :validations [st/required st/string validate-length]
+      :validations [st/required st/string (validate-length 2)]
+      ]
+
+     [c/text-input
+      :label "Age"
+      :name :middle-name
+      :optional true
+      :validations [(validate-length 2) ]
       ]
 
      [c/text-input
       :label "Last Name"
       :name :last-name
-      :validations [st/required st/string validate-length]
-      ]]))
+      :validations [st/required st/string (validate-length 4)]
+      ]
+
+     [:div
+      (if (get-in @n/db [:error :first-name])
+                  [:h1 "error"]
+                  [:h2 "no error"])]
+      ]
+     ))
+
 
 (defn post-page []
   [c/section
