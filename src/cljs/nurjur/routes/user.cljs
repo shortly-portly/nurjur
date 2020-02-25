@@ -5,41 +5,27 @@
             [nurjur.db :as n]
             [struct.core :as st]))
 
-
 (defn validate-length [length]
   {:message (str "Length must be greater than " length)
    :validate #(> (count %) length)})
 
 (defn user-form []
-  (fn []
-    [:div
-
-     [c/text-input
-      :label "First Name"
-      :name :first-name
-      :validations [st/required st/string (validate-length 2)]
-      ]
-
-     [c/text-input
-      :label "Age"
-      :name :middle-name
+  (c/form
+   {:form-name :user/form
+    :fields
+    [{:type :text
+      :label "First Name3"
+      :name :user/first-name
+      :validations [st/required st/string (validate-length 2)]}
+     {:type :text
+      :label "Middle Name"
       :optional true
-      :validations [(validate-length 2) ]
-      ]
-
-     [c/text-input
+      :name :user/middle-name
+      :validations [st/required st/string (validate-length 2)]}
+     {:type :text
       :label "Last Name"
-      :name :last-name
-      :validations [st/required st/string (validate-length 4)]
-      ]
-
-     [:div
-      (if (get-in @n/db [:error :first-name])
-                  [:h1 "error"]
-                  [:h2 "no error"])]
-      ]
-     ))
-
+      :name :user/last-name
+      :validations [st/required st/string (validate-length 2)]}]}))
 
 (defn post-page []
   [c/section

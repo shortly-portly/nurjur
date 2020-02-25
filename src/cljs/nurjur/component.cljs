@@ -19,11 +19,13 @@
       {field-name nil})
     {field-name nil}))
 
+(defn validate-form [form-name])
+
 (defn section [content]
   [:section.section>div.container>div.content
    content])
 
-(defn text-input [& {:as args}]
+(defn text-input [args]
   (swap! n/db assoc :optional (merge (:optional @n/db) {(:name args) (:optional args)}))
   (fn []
     [:div.field
@@ -31,10 +33,24 @@
      [:div.control
       [:input.input
        {:type :text
-        :name (:name args)
+        :name (str (namespace (:name args)) "-" (name(:name args)))
         :defaultValue (:name @n/db)
         :on-blur #((swap! n/db assoc (:name args) (-> % .-target .-value))
                    (swap! n/db assoc :error (merge (:error @n/db) (validate (:name args) (:validations args)))))}]]
 
      (if-let [error-text (get-in @n/db [:error (:name args)])]
        [:p.help.is-danger error-text])]))
+
+(defn form [ args]
+  (fn []
+    [:form
+     (for [field (:fields args)]
+       [text-input field])
+
+     [:button.button.is-primary {:on-click
+                                 #(do
+                                   (.preventDefault %)
+                                   (js/console.log "click"))}
+      "wibble2"]
+
+     ]))
