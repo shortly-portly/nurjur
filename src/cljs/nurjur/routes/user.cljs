@@ -16,6 +16,7 @@
     [{:type :text
       :label "First Name3"
       :name :user/first-name
+      :default "David"
       :validations [st/required st/string (validate-length 2)]}
      {:type :text
       :label "Middle Name"
