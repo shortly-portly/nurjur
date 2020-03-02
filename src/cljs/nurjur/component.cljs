@@ -5,7 +5,8 @@
             [reitit.coercion :as rc]
             [nurjur.db :as n]
             [struct.core :as st]
-            [reitit.coercion.spec :as rss]))
+            [reitit.coercion.spec :as rss]
+            [ajax.core :refer [GET POST]]))
 
 (defn validate? [field-name]
   "Determine if the given field should be validated. An optional field will be validated if it contains data."
@@ -34,6 +35,19 @@
   (validate-fields! fields)
   ;(validate-form! (:fields args) (:form-validations args))
   (empty? (:errors @n/db)))
+
+(defn post-data! []
+  (js/console.log "token " js/csrfToken)
+  (POST "/thanks"
+    {:params {:first-name (:fist-name @n/db)
+              :middle-name (:middle-name @n/db)
+              :last-name (:last-name @n/db)
+              :__anti-forgery-token js/csrfToken}
+     :format :json
+     :headers {"Accept" "application/transit+json"
+               "x-csrf-token" js/csrfToken}
+     :handler #(js/console.log (str "response " %))
+     :error-handler #(js/console.log (str "error " %))}))
 
 (defn section [content]
   [:section.section>div.container>div.content
@@ -67,7 +81,7 @@
        #(do
           (.preventDefault %)
           (if (form-valid? (:fields args))
-            (js/console.log "form valid")
+            (post-data!)
             (js/console.log "form invalid")))}
       "wibble2"]]))
 

@@ -31,11 +31,15 @@
   (content-type (ok (html
    [:h1 "Welcome Users"])) "text/html; charset=utf-8"))
 
+(defn thanks-page [request]
+  (content-type (ok (html
+                     [:h1 "Ta very muchly."])) "text/html; charset=utf-8"))
 (defn user-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/users" {:get index-page}]
+   ["/thanks" {:post thanks-page}]
    ])
 
 (comment

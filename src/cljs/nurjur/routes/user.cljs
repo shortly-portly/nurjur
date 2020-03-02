@@ -39,7 +39,7 @@
    [:h2 "Thanks"]])
 
 (def user-routes
-  [""
+  ["/users"
    ["/post" {:name ::post
              :view post-page}]
    ["/thanks" {:name ::thanks
