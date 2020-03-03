@@ -32,6 +32,9 @@
    [:h1 "Welcome Users"])) "text/html; charset=utf-8"))
 
 (defn thanks-page [request]
+  (println "Request")
+  (println request)
+  (println (:params request))
   (content-type (ok (html
                      [:h1 "Ta very muchly."])) "text/html; charset=utf-8"))
 (defn user-routes []

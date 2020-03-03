@@ -36,13 +36,9 @@
   ;(validate-form! (:fields args) (:form-validations args))
   (empty? (:errors @n/db)))
 
-(defn post-data! []
-  (js/console.log "token " js/csrfToken)
+(defn post-data! [fields]
   (POST "/thanks"
-    {:params {:first-name (:fist-name @n/db)
-              :middle-name (:middle-name @n/db)
-              :last-name (:last-name @n/db)
-              :__anti-forgery-token js/csrfToken}
+    {:params (into {} (for [field fields] {(:name field) ((:name field) @n/db)}))
      :format :json
      :headers {"Accept" "application/transit+json"
                "x-csrf-token" js/csrfToken}
@@ -81,7 +77,7 @@
        #(do
           (.preventDefault %)
           (if (form-valid? (:fields args))
-            (post-data!)
+            (post-data! (:fields args))
             (js/console.log "form invalid")))}
       "wibble2"]]))
 
