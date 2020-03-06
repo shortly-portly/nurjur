@@ -9,24 +9,43 @@
   {:message (str "Length must be greater than " length)
    :validate #(> (count %) length)})
 
+(defn passwords-match [password repeat-password]
+  {:message "Passwords do not match"
+   :validate (fn []
+               (= password repeat-password))})
+
+(def user-schema
+  [[:user/first-name st/required st/string]
+   [:user/last-name st/required st/string]
+   [:user/password st/required st/string]
+   [:user/repeat-password st/required st/string]
+   [:user/password [st/identical-to :user/repeat-password]]])
+
 (defn user-form []
   (c/form
    {:form-name :user/form
     :fields
     [{:type :text
-      :label "First Name3"
+      :label "First Name"
       :name :user/first-name
-      :default "David"
-      :validations [st/required st/string (validate-length 2)]}
-     {:type :text
-      :label "Middle Name"
-      :optional true
-      :name :user/middle-name
-      :validations [st/required st/string (validate-length 2)]}
+      :validations [st/required st/string]}
+
      {:type :text
       :label "Last Name"
       :name :user/last-name
-      :validations [st/required st/string (validate-length 2)]}]}))
+      :validations [st/required st/string]}
+
+     {:type :text
+      :label "Password"
+      :name :user/password
+      :validations [st/required st/string]}
+
+     {:type :text
+      :label "Repeat Password"
+      :name :user/repeat-password
+      :validations [st/required st/string]}]
+
+    :validations user-schema}))
 
 (defn post-page []
   [c/section
