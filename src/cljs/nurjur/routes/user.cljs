@@ -19,7 +19,7 @@
    [:user/last-name st/required st/string]
    [:user/password st/required st/string]
    [:user/repeat-password st/required st/string]
-   [:user/password [st/identical-to :user/repeat-password]]])
+   [:user/password st/identical-to :user/repeat-password]])
 
 (defn user-form []
   (c/form
@@ -45,7 +45,7 @@
       :name :user/repeat-password
       :validations [st/required st/string]}]
 
-    :validations user-schema}))
+    :validations [:user/password [st/identical-to :user/repeat-password]]}))
 
 (defn post-page []
   [c/section

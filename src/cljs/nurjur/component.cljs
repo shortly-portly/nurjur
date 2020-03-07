@@ -8,6 +8,11 @@
             [reitit.coercion.spec :as rss]
             [ajax.core :refer [GET POST]]))
 
+(defn to-validation [field]
+  "Given a map with a key of :name and :validations, return a vector suitable for
+   passwing to st/validate"
+  (into [(:name field)] (:validations field)))
+
 (defn validate? [field-name]
   "Determine if the given field should be validated. An optional field will be validated if it contains data."
   (or (seq (field-name @n/db))
@@ -63,6 +68,8 @@
 
 (defn form [args]
   (fn []
+    (let [form-validations (into  (mapv to-validation (:fields args)) [(:validations args)])]
+      (js/console.log form-validations)
     [:form
      (for [field (:fields args)]
        [text-input field])
@@ -71,20 +78,20 @@
       {:on-click
        #(do
           (.preventDefault %)
-          (if (form-valid? (:validations args))
+          (if (form-valid? form-validations)
             (post-data! (:fields args))
             (js/console.log "form invalid")))}
-      "wibble2"]]))
+      "wibble2"]])))
 
 ; Test data
 
+; (require 'my.namespace :reload-all)
 
 (defn validate-length [length]
   {:message (str "Length must be greater than " length)
    :validate #(> (count %) length)})
 
 (def test-fields
-  {:fields
    [{:type :text
      :label "First Name3"
      :name :user/first-name
@@ -99,7 +106,7 @@
      :label "Last Name"
      :name :user/last-name
      :default "Simmons"
-     :validations [st/required st/string (validate-length 2)]}]})
+     :validations [st/required st/string (validate-length 2)]}])
 
 (def args-2
   {:form-name :user/form
@@ -117,7 +124,35 @@
     {:type :text
      :label "Last Name"
      :name :user/last-name
-     :validations [st/required st/string (validate-length 2)]}]})
+     :validations [st/required st/string (validate-length 2)]}]
+    :validations [:user/password [st/identical-to :user/repeat-password]]
+   })
+
+(defn test-form []
+  (form
+   {:form-name :user/form
+    :fields
+    [{:type :text
+      :label "First Name"
+      :name :user/first-name
+      :validations [st/required st/string]}
+
+     {:type :text
+      :label "Last Name"
+      :name :user/last-name
+      :validations [st/required st/string]}
+
+     {:type :text
+      :label "Password"
+      :name :user/password
+      :validations [st/required st/string]}
+[:user/password [st/identical-to :user/repeat-password]]
+     {:type :text
+      :label "Repeat Password"
+      :name :user/repeat-password
+      :validations [st/required st/string]}]
+
+    :validations [:user/password [st/identical-to :user/repeat-password]]}))
 
 (def user-schema
   [[:user/first-name st/required st/string]
